@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT Asset Manager</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💻</text></svg>">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+</head>
+<body class="bg-light">
+
+<nav class="navbar navbar-dark bg-dark mb-4 shadow">
+    <div class="container">
+        <span class="navbar-brand mb-0 h1 d-flex align-items-center">
+            <i class="bi bi-pc-display me-2"></i> IT Asset Manager
+        </span>
+    </div>
+</nav>
+
+<div class="container">
+
+    <div th:if="${mensagemSucesso}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i><strong>Sucesso!</strong> <span th:text="${mensagemSucesso}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div th:if="${mensagemErro}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i><strong>Atenção:</strong> <span th:text="${mensagemErro}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div class="row mb-4 g-3">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white shadow border-0 h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase mb-1">Total de Ativos</h6>
+                        <h2 class="display-6 fw-bold mb-0" th:text="${totalAssets}">0</h2>
+                    </div>
+                    <i class="bi bi-boxes display-4 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white shadow border-0 h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase mb-1">Disponíveis</h6>
+                        <h2 class="display-6 fw-bold mb-0" th:text="${available}">0</h2>
+                    </div>
+                    <i class="bi bi-check2-circle display-4 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-secondary text-white shadow border-0 h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase mb-1">Em Uso</h6>
+                        <h2 class="display-6 fw-bold mb-0" th:text="${inUse}">0</h2>
+                    </div>
+                    <i class="bi bi-person-workspace display-4 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-danger text-white shadow border-0 h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase mb-1">Em Manutenção</h6>
+                        <h2 class="display-6 fw-bold mb-0" th:text="${inMaintenance}">0</h2>
+                    </div>
+                    <i class="bi bi-tools display-4 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <form th:action="@{/}" method="get" class="d-flex bg-white p-3 rounded shadow-sm border-0">
+                <input type="text" name="keyword" class="form-control me-2" placeholder="Buscar por Nome ou Número de Série..." th:value="${param.keyword}">
+                <button type="submit" class="btn btn-secondary px-4"><i class="bi bi-search me-1"></i> Buscar</button>
+                <a th:href="@{/}" class="btn btn-outline-secondary ms-2"><i class="bi bi-eraser me-1"></i> Limpar</a>
+            </form>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="text-secondary mb-0"><i class="bi bi-list-task me-2"></i>Inventário de Hardware</h4>
+        <button class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#modalCadastro">
+            <i class="bi bi-plus-lg me-1"></i> Novo Ativo
+        </button>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-5">
+        <div class="card-body p-0 table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                <tr>
+                    <th class="ps-4">Nome do Equipamento</th>
+                    <th>Nº de Série</th>
+                    <th>Categoria</th>
+                    <th>Status</th>
+                    <th class="text-end pe-4">Ações</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="a : ${assets}">
+                    <td class="ps-4 fw-bold text-dark" th:text="${a.name}">Nome</td>
+                    <td th:text="${a.serialNumber}" class="font-monospace text-muted">12345</td>
+                    <td>
+                        <i class="bi bi-laptop text-secondary me-1" th:if="${a.category == 'Laptop'}"></i>
+                        <i class="bi bi-pc text-secondary me-1" th:if="${a.category == 'Desktop'}"></i>
+                        <span th:text="${a.category}">Laptop</span>
+                    </td>
+                    <td>
+                        <span th:if="${a.status == 'AVAILABLE'}" class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3">Disponível</span>
+                        <span th:if="${a.status == 'IN_USE'}" class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill px-3">Em Uso</span>
+                        <span th:if="${a.status == 'MAINTENANCE'}" class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-3">Manutenção</span>
+                    </td>
+                    <td class="text-end pe-4">
+                        <button type="button" class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal" th:attr="data-bs-target='#modalEditar' + ${a.id}" title="Editar">
+                            <i class="bi bi-pencil-square"></i> Editar
+                        </button>
+
+                        <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" th:attr="data-bs-target='#modalExcluir' + ${a.id}" title="Excluir">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(assets)}">
+                    <td colspan="5" class="text-center text-muted py-5">
+                        <i class="bi bi-inbox display-4 d-block mb-3 text-secondary opacity-50"></i>
+                        Nenhum equipamento cadastrado ainda ou encontrado na busca.
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalCadastro" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 shadow">
+            <form th:action="@{/save}" th:object="${asset}" method="POST">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-plus-circle me-2 text-primary"></i>Cadastrar Novo Ativo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label th:for="${#ids.next('name')}" class="form-label text-secondary fw-semibold">Nome do Equipamento</label>
+                            <input type="text" th:field="*{name}" class="form-control" placeholder="Ex: ThinkPad T14" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label th:for="${#ids.next('serialNumber')}" class="form-label text-secondary fw-semibold">Número de Série</label>
+                            <input type="text" th:field="*{serialNumber}" class="form-control" placeholder="Ex: 5XJ9P2" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label th:for="${#ids.next('category')}" class="form-label text-secondary fw-semibold">Categoria</label>
+                            <select th:field="*{category}" class="form-select">
+                                <option value="Laptop">Laptop / Notebook</option>
+                                <option value="Desktop">Desktop</option>
+                                <option value="Monitor">Monitor</option>
+                                <option value="Periférico">Periférico (Teclado/Mouse)</option>
+                                <option value="Outros">Outros</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label th:for="${#ids.next('status')}" class="form-label text-secondary fw-semibold">Status Inicial</label>
+                            <select th:field="*{status}" class="form-select">
+                                <option value="AVAILABLE">Disponível</option>
+                                <option value="IN_USE">Em Uso</option>
+                                <option value="MAINTENANCE">Manutenção</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label th:for="${#ids.next('notes')}" class="form-label text-secondary fw-semibold">Observações / Especificações</label>
+                        <textarea th:field="*{notes}" class="form-control" rows="3" placeholder="Ex: Core i5, 16GB RAM, SSD 512GB..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-save me-1"></i> Salvar Ativo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<th:block th:each="a : ${assets}">
+
+    <div class="modal fade" th:id="'modalEditar' + ${a.id}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content border-0 shadow">
+                <form th:action="@{/save}" method="POST">
+
+                    <input type="hidden" name="id" th:value="${a.id}">
+
+                    <div class="modal-header bg-light">
+                        <h5 class="modal-title fw-bold"><i class="bi bi-pencil-square me-2 text-primary"></i>Editar Ativo</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label th:for="'editName' + ${a.id}" class="form-label text-secondary fw-semibold">Nome</label>
+                                <input type="text" th:id="'editName' + ${a.id}" name="name" th:value="${a.name}" class="form-control" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label th:for="'editSerial' + ${a.id}" class="form-label text-secondary fw-semibold">Número de Série</label>
+                                <input type="text" th:id="'editSerial' + ${a.id}" name="serialNumber" th:value="${a.serialNumber}" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label th:for="'editCategory' + ${a.id}" class="form-label text-secondary fw-semibold">Categoria</label>
+                                <select th:id="'editCategory' + ${a.id}" name="category" class="form-select">
+                                    <option value="Laptop" th:selected="${a.category == 'Laptop'}">Laptop / Notebook</option>
+                                    <option value="Desktop" th:selected="${a.category == 'Desktop'}">Desktop</option>
+                                    <option value="Monitor" th:selected="${a.category == 'Monitor'}">Monitor</option>
+                                    <option value="Periférico" th:selected="${a.category == 'Periférico'}">Periférico</option>
+                                    <option value="Outros" th:selected="${a.category == 'Outros'}">Outros</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label th:for="'editStatus' + ${a.id}" class="form-label text-secondary fw-semibold">Status</label>
+                                <select th:id="'editStatus' + ${a.id}" name="status" class="form-select">
+                                    <option value="AVAILABLE" th:selected="${a.status == 'AVAILABLE'}">Disponível</option>
+                                    <option value="IN_USE" th:selected="${a.status == 'IN_USE'}">Em Uso</option>
+                                    <option value="MAINTENANCE" th:selected="${a.status == 'MAINTENANCE'}">Manutenção</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label th:for="'editNotes' + ${a.id}" class="form-label text-secondary fw-semibold">Observações / Especificações</label>
+                            <textarea th:id="'editNotes' + ${a.id}" name="notes" th:text="${a.notes}" class="form-control" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-arrow-clockwise me-1"></i> Atualizar Ativo</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" th:id="'modalExcluir' + ${a.id}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i>Confirmar Exclusão</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center py-4">
+                    <i class="bi bi-trash text-danger display-1 mb-3 opacity-75"></i>
+                    <h5 class="mb-3">Tem certeza que deseja excluir?</h5>
+                    <p class="text-muted mb-1">Você está prestes a excluir o equipamento:</p>
+                    <p class="fw-bold fs-5 mb-3 text-dark" th:text="${a.name}"></p>
+                    <div class="alert alert-warning py-2 mb-0" role="alert">
+                        <i class="bi bi-info-circle me-1"></i> Esta ação é permanente e não poderá ser desfeita.
+                    </div>
+                </div>
+                <div class="modal-footer bg-light justify-content-center border-0 pt-0 pb-3">
+                    <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Cancelar</button>
+
+                    <form th:action="@{/delete/{id}(id=${a.id})}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-danger px-4"><i class="bi bi-trash me-1"></i> Sim, Excluir</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</th:block>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
